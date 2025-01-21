@@ -2,11 +2,36 @@ services:
   app:
     image: hoppscotch/hoppscotch
     restart: unless-stopped
-    env_file:
-      - ./.env
     depends_on:
       database:
         condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-testpass}@database:5432/${POSTGRES_DB:-hoppscotch}?serverVersion=${POSTGRES_VERSION:-15}&charset=${POSTGRES_CHARSET:-utf8}
+      JWT_SECRET: ${JWT_SECRET:-secret1234}
+      TOKEN_SALT_COMPLEXITY: ${TOKEN_SALT_COMPLEXITY:-10}
+      MAGIC_LINK_TOKEN_VALIDITY: ${MAGIC_LINK_TOKEN_VALIDITY:-3}
+      REFRESH_TOKEN_VALIDITY: ${REFRESH_TOKEN_VALIDITY:-604800000}
+      ACCESS_TOKEN_VALIDITY: ${ACCESS_TOKEN_VALIDITY:-86400000}
+      SESSION_SECRET: ${SESSION_SECRET:-anothersecret1234}
+      ALLOW_SECURE_COOKIES: ${ALLOW_SECURE_COOKIES:-false}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-dataencryptionkey}
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+      REDIRECT_URL: ${REDIRECT_URL:-http://${SERVER_NAME:-localhost}}
+      WHITELISTED_ORIGINS: ${WHITELISTED_ORIGINS:-http://${SERVER_NAME:-localhost},http://${SERVER_NAME:-localhost}/backend,http://${SERVER_NAME:-localhost}/admin}}
+      VITE_ALLOWED_AUTH_PROVIDERS: ${VITE_ALLOWED_AUTH_PROVIDERS:-EMAIL}
+      MAILER_SMTP_ENABLE: ${MAILER_SMTP_ENABLE:-true}
+      MAILER_USE_CUSTOM_CONFIGS: ${MAILER_USE_CUSTOM_CONFIGS:-false}
+      MAILER_ADDRESS_FROM: ${MAILER_ADDRESS_FROM:-no-reply@${SERVER_NAME:-localhost}}
+      MAILER_SMTP_URL: ${MAILER_SMTP_URL:-smtp://host.docker.internal:1025"}
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      VITE_BASE_URL: ${VITE_BASE_URL:-http://${SERVER_NAME:-localhost}}
+      VITE_SHORTCODE_BASE_URL: ${VITE_SHORTCODE_BASE_URL:-http://${SERVER_NAME:-localhost}}
+      VITE_ADMIN_URL: ${VITE_ADMIN_URL:-http://${SERVER_NAME:-localhost}/admin}
+      VITE_BACKEND_GQL_URL: ${VITE_BACKEND_GQL_URL:-http://${SERVER_NAME:-localhost}/backend/graphql}
+      VITE_BACKEND_WS_URL: ${VITE_BACKEND_WS_URL:-ws://${SERVER_NAME:-localhost}/backend/graphql}
+      VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-http://${SERVER_NAME:-localhost}/backend/v1}
+      ENABLE_SUBPATH_BASED_ACCESS: ${ENABLE_SUBPATH_BASED_ACCESS:-true}
     ports:
       # - "3000:3000"
       # - "3100:3100"
@@ -29,10 +54,10 @@ services:
   database:
     image: postgres:${POSTGRES_VERSION:-15}-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-hoppscotch}
+      POSTGRES_DB: ${POSTGRES_DB:-hoppscotch}
       # You should definitely change the password in production
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-testpass}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpass}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
     healthcheck:
       test:
         [
